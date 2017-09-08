@@ -119,10 +119,11 @@ class bitmap_memory_resource
 
     void* allocate(std::size_t num_bytes)
     {
+      // find how many blocks to allocate
       std::size_t num_blocks = (num_bytes + block_size_in_bytes_ - 1) / block_size_in_bytes_;
 
       // search for num_blocks contiguous free blocks
-      auto found = std::search(free_blocks_.begin(), free_blocks_.end(), constant_iterator<bool>(true, 0), constant_iterator<bool>(true, num_bytes));
+      auto found = std::search(free_blocks_.begin(), free_blocks_.end(), constant_iterator<bool>(true, 0), constant_iterator<bool>(true, num_blocks));
       if(found == free_blocks_.end())
       {
         return nullptr;
