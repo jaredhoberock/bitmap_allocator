@@ -151,5 +151,57 @@ class bitmap_memory_resource
       // mark those blocks as free
       std::fill_n(free_blocks_.begin() + index_of_first_block, num_blocks, true);
     }
+
+    bool operator==(const bitmap_memory_resource& rhs) const
+    {
+      return this == &rhs;
+    }
+
+    bool operator!=(const bitmap_memory_resource& rhs) const
+    {
+      return this != &rhs;
+    }
+};
+
+
+template<class T>
+class bitmap_allocator
+{
+  private:
+    bitmap_memory_resource& resource_;
+
+    template<class U> friend class bitmap_allocator;
+
+  public:
+    using value_type = T;
+    
+    bitmap_allocator(bitmap_memory_resource& resource)
+      : resource_(resource)
+    {}
+
+    template<class U>
+    bitmap_allocator(const bitmap_allocator<U>& other)
+      : resource_(other.resource_)
+    {}
+
+    T* allocate(std::size_t n)
+    {
+      return reinterpret_cast<T*>(resource_.allocate(n * sizeof(T)));
+    }
+
+    void deallocate(T* ptr, std::size_t n)
+    {
+      resource_.deallocate(ptr, n * sizeof(T));
+    }
+
+    bool operator==(const bitmap_memory_resource& rhs) const
+    {
+      return resource_ == rhs.resource_;
+    }
+
+    bool operator!=(const bitmap_memory_resource& rhs) const
+    {
+      return resource_ != rhs.resource_;
+    }
 };
 
